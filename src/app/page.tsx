@@ -2,12 +2,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, {useEffect, useState} from "react";
 import {environment} from './environment';
-import {fetchWithCredentials} from "@/app/fetchWithCredentials";
+import axiosInstance from './axiosInstance';
 
 
 export default function Home() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userName, setUserName] = useState("");
+    let [userName, setUserName] = useState("");
     const [messages, setMessages] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -18,10 +18,10 @@ export default function Home() {
 
     const getUserInfo = async () => {
         try {
-            const userInfo = await fetchWithCredentials('/userinfo', {method: 'GET'});
-            if (userInfo) {
+            const response = await axiosInstance.get('/userinfo',);
+            if (response.status === 200) {
+                setUserName(response.data.sub);
                 setIsAuthenticated(true);
-                setUserName(userInfo.sub);
             }
         } catch (error) {
             setIsAuthenticated(false);
@@ -31,9 +31,9 @@ export default function Home() {
 
     const getMessages = async () => {
         try {
-            const messages = await fetchWithCredentials('/messages', {method: 'GET'});
-            if (messages) {
-                setMessages(messages);
+            const response = await axiosInstance.get('/messages');
+            if (response.status === 200) {
+                setMessages(response.data);
             }
         } catch (error) {
             console.error('Error fetching messages:', error);
@@ -52,7 +52,7 @@ export default function Home() {
 
     const logout = () => {
         try {
-            fetchWithCredentials('/logout', {method: 'POST'});
+            axiosInstance.post('/logout');
             setIsAuthenticated(false);
             setUserName("");
             setMessages([]);
